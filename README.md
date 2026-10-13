@@ -118,3 +118,7 @@ The first commit was published through the connected GitHub integration. The ful
 ## License
 
 MIT. This public sample is separate from the private `thought-substrate` backend, which is **not** copied into this repository.
+
+### Expanded Tesla research scope (not yet automated)
+
+A serious point-in-time analysis must include macroeconomic releases (rates, inflation, unemployment), wars and geopolitical shocks (sanctions, shipping, energy and supply chains), and **separate regional exposure for Tesla Shanghai and Berlin-Brandenburg**. Shanghai requires China demand, domestic EV competition, factory/export figures and cross-border tariffs. Berlin requires EU demand, factory output, labor, energy cost and disruptions. See `GET /api/market/tesla-events?asOf=2026-10-13` for a curated, dated source list and explicit planned feeds. These signals are **not yet connected to the forecast** and do not automatically imply share-price direction. Historical forecasting must prevent future-release or revised-data leakage.
