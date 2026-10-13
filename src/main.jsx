@@ -12,6 +12,8 @@ function Spark({values,forecastValues=[]}){const all=[...values,...forecastValue
 export function Substrate({title='Company Research',children}){
 const [run,setRun]=useState(null),[loading,setLoading]=useState(false),[error,setError]=useState('');
 const [ticker,setTicker]=useState('TSLA · Tesla, Inc.'),[prices,setPrices]=useState(MOCK),[dataSource,setDataSource]=useState('Synthetic illustration — click Load Tesla history for historical prices'),[importError,setImportError]=useState('');
+const [historyBusy,setHistoryBusy]=useState(false);
+const [,setAsOf]=useState(null);
 const analysis=useMemo(()=>forecast(prices),[prices]);
 async function loadTesla(){setHistoryBusy(true);setImportError('');try{const response=await fetch('/api/market/tesla-history');const data=await response.json();if(!response.ok)throw Error(data.error||'Price provider unavailable');setPrices(data.prices);setTicker('TSLA · Tesla, Inc.');setAsOf(data.asOf);setDataSource(data.source+' · '+data.firstDate+' to '+data.asOf+' · '+data.points+' observations; corporate-action adjustments not independently verified');setRun(null)}catch(e){setImportError(e.message+' — import a CSV manually instead.')}finally{setHistoryBusy(false)}}
 useEffect(()=>{if(!run?.id||['completed','rejected','failed'].includes(run.status))return;const interval=setInterval(async()=>{try{const r=await fetch('/api/runs/'+encodeURIComponent(run.id));if(r.ok)setRun(await r.json())}catch{}},600);return()=>clearInterval(interval)},[run?.id,run?.status]);
