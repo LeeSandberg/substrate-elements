@@ -17,6 +17,10 @@ npm run dev
 
 Open **http://127.0.0.1:5173** (React example) or **http://127.0.0.1:5173/examples/plain-html.html** (HTML custom element). The backend listens on localhost port 8789. Both examples work without credentials using explicitly synthetic agents.
 
+## Interactive company and stock research demonstration
+
+The homepage now explains the value proposition through a stock-research example. It includes a **synthetic** chart and a transparent, deterministic 5-step momentum projection, walk-forward backtesting versus a no-change baseline, and an optional upload of CSV historical close prices. The upload stays in the browser. **No live price source is connected, no fundamental company data is fetched, and uploaded prices are not yet passed to the agent runtime.** The separate research → critic → human approval → reporter workflow remains an explicitly labeled synthetic demo. Forecasts are exploratory, not investment recommendations or verified predictive ability.
+
 ## React DSL
 
 ```jsx
