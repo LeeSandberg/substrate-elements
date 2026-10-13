@@ -10,6 +10,8 @@ export const RESEARCH_INPUTS=[
  {category:'macro',name:'USD, Treasury yields, energy prices',source:'FRED and official markets',status:'Planned: align observation timestamps'},
  {category:'industry',name:'EV registrations, competitors and battery input costs',source:'Manufacturer and government releases',status:'Planned'},
  {category:'policy',name:'Tariffs, tax credits and EV regulation',source:'Official regulations and dated announcements',status:'Planned'},
+ {category:'geopolitics',name:'Wars, military escalation, sanctions and trade restrictions',source:'Official statements, dated sanctions registers, corroborated news; mark event and publication timestamps',status:'Planned: impact hypotheses must be tested, not presumed'},
+ {category:'geopolitics',name:'Conflict-related shipping disruption, commodities and supply-chain exposure',source:'Shipping indices, energy prices and supplier disclosures',status:'Planned: distinguish indirect effects from observed Tesla exposure'},
  {category:'company',name:'Tesla filings, margins, cash flow, delivery revisions',source:'SEC / Tesla IR',status:'Planned: point-in-time extraction'}
 ];
 export function visibleEvents(asOf){if(!/^\d{4}-\d{2}-\d{2}$/.test(asOf))throw Error('Date must be YYYY-MM-DD');return TESLA_EVENTS.filter(x=>x.availableAt<=asOf)}
