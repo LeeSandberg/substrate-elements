@@ -1,7 +1,7 @@
 import http from 'node:http';
 import {createRun,emit,safeDemoAnswer,validatePlan} from './engine.js';
 import {runModelAgent} from './provider.js';
-import {configured,recordToSubstrate,createCapsule,verifyCapsule,quarantineCapsule,inspectWorkspace} from './mcp.js';
+import {configured,checkSubstrate,recordToSubstrate,createCapsule,verifyCapsule,quarantineCapsule,inspectWorkspace} from './mcp.js';
 
 const runs=new Map(),listeners=new Map();
 const reviewKey=process.env.REVIEW_API_KEY;
@@ -35,8 +35,8 @@ async function execute(run){
     try{
       const output=await runAgent(step,run.results.slice(-8));
       const synthetic=!['openai-compatible','webhook'].includes(process.env.RUNNER_MODE);
-      let recording={recorded:false,mode:'not-configured'};
-      if(configured()){try{recording=await recordToSubstrate({stepId:step.id,role:step.role,answer:output.answer,synthetic,runId:run.id})}catch(e){recording={recorded:false,mode:'error',error:safe(e)}}}
+      let recording={recorded:false,mode:'not-configured',verified:false};
+      if(configured()){try{recording=await recordToSubstrate({stepId:step.id,role:step.role,answer:output.answer,synthetic,runId:run.id})}catch(e){recording={recorded:false,mode:'error',verified:false,error:safe(e)}}}
       const result={stepId:step.id,role:step.role,answer:output.answer,synthetic,evidence:output.evidence||[],recording};
       run.results.push(result);publish(run,'agent_completed',result);
     }catch(e){run.status='failed';publish(run,'agent_failed',{stepId:step.id,error:safe(e)});return}
@@ -47,6 +47,7 @@ const server=http.createServer(async(req,res)=>{
   try{
     const url=new URL(req.url,'http://localhost');const p=url.pathname.split('/').filter(Boolean);
     if(req.method==='GET'&&url.pathname==='/api/health')return respond(res,200,{ok:true,mode:process.env.RUNNER_MODE||'demo',substrate:configured()});
+    if(req.method==='GET'&&url.pathname==='/api/substrate/health')return respond(res,200,await checkSubstrate());
     if(req.method==='POST'&&url.pathname==='/api/runs'){
       const plan=validatePlan(await readBody(req));const run=createRun(plan);run.queue=flattened(plan.steps);run.cursor=0;runs.set(run.id,run);
       setImmediate(()=>execute(run));return respond(res,201,{id:run.id,status:run.status});
