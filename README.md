@@ -19,6 +19,8 @@ Open **http://127.0.0.1:5173** (React example) or **http://127.0.0.1:5173/exampl
 
 ## Interactive company and stock research demonstration
 
+The homepage now uses **Tesla (NASDAQ: TSLA)** as its concrete, sourced research case. Tesla Q2 2026 reported deliveries and energy storage deployments are linked to official Tesla Investor Relations pages. A fixed server-side `/api/market/tesla-history` endpoint requests third-party Stooq daily close prices on demand; availability is not guaranteed. The source and last observation date are displayed, and users can upload a CSV if the provider rejects the request. The data is not a real-time exchange quote. The historical-price forecast deliberately does **not** ingest Tesla fundamentals or news; this is not evidence of predictive power.
+
 The homepage now explains the value proposition through a stock-research example. It includes a **synthetic** chart and a transparent, deterministic 5-step momentum projection, walk-forward backtesting versus a no-change baseline, and an optional upload of CSV historical close prices. The upload stays in the browser. **No live price source is connected, no fundamental company data is fetched, and uploaded prices are not yet passed to the agent runtime.** The separate research → critic → human approval → reporter workflow remains an explicitly labeled synthetic demo. Forecasts are exploratory, not investment recommendations or verified predictive ability.
 
 ## React DSL

@@ -1,4 +1,5 @@
 import http from 'node:http';
+import {loadTeslaPrices} from './tesla-data.js';
 import {createRun,emit,safeDemoAnswer,validatePlan} from './engine.js';
 import {runModelAgent} from './provider.js';
 import {configured,checkSubstrate,recordToSubstrate,createCapsule,verifyCapsule,quarantineCapsule,inspectWorkspace} from './mcp.js';
@@ -46,6 +47,7 @@ async function execute(run){
 const server=http.createServer(async(req,res)=>{
   try{
     const url=new URL(req.url,'http://localhost');const p=url.pathname.split('/').filter(Boolean);
+    if(req.method==='GET'&&url.pathname==='/api/market/tesla-history'){try{return respond(res,200,await loadTeslaPrices())}catch(e){return respond(res,502,{error:'Tesla price data unavailable: '+safe(e)})}}
     if(req.method==='GET'&&url.pathname==='/api/health')return respond(res,200,{ok:true,mode:process.env.RUNNER_MODE||'demo',substrate:configured()});
     if(req.method==='GET'&&url.pathname==='/api/substrate/health')return respond(res,200,await checkSubstrate());
     if(req.method==='POST'&&url.pathname==='/api/runs'){
