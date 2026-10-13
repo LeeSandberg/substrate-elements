@@ -17,12 +17,6 @@ npm run dev
 
 Open **http://127.0.0.1:5173** (React example) or **http://127.0.0.1:5173/examples/plain-html.html** (HTML custom element). The backend listens on localhost port 8789. Both examples work without credentials using explicitly synthetic agents.
 
-## Interactive company and stock research demonstration
-
-The homepage now uses **Tesla (NASDAQ: TSLA)** as its concrete, sourced research case. Tesla Q2 2026 reported deliveries and energy storage deployments are linked to official Tesla Investor Relations pages. A fixed server-side `/api/market/tesla-history` endpoint requests third-party Stooq daily close prices on demand; availability is not guaranteed. When Stooq denies anonymous requests (HTTP 403), configure `ALPHA_VANTAGE_API_KEY` server-side for the documented Alpha Vantage daily price endpoint. Its free tier returns a compact history; quota limits apply. The source and last observation date are displayed, and users can upload a CSV if the provider rejects the request. The data is not a real-time exchange quote. The historical-price forecast deliberately does **not** ingest Tesla fundamentals or news; this is not evidence of predictive power.
-
-The homepage now explains the value proposition through a stock-research example. It includes a **synthetic** chart and a transparent, deterministic 5-step momentum projection, walk-forward backtesting versus a no-change baseline, and an optional upload of CSV historical close prices. The upload stays in the browser. **No live price source is connected, no fundamental company data is fetched, and uploaded prices are not yet passed to the agent runtime.** The separate research → critic → human approval → reporter workflow remains an explicitly labeled synthetic demo. Forecasts are exploratory, not investment recommendations or verified predictive ability.
-
 ## React DSL
 
 ```jsx
@@ -118,7 +112,3 @@ The first commit was published through the connected GitHub integration. The ful
 ## License
 
 MIT. This public sample is separate from the private `thought-substrate` backend, which is **not** copied into this repository.
-
-### Expanded Tesla research scope (not yet automated)
-
-A serious point-in-time analysis must include macroeconomic releases (rates, inflation, unemployment), wars and geopolitical shocks (sanctions, shipping, energy and supply chains), and **separate regional exposure for Tesla Shanghai and Berlin-Brandenburg**. Shanghai requires China demand, domestic EV competition, factory/export figures and cross-border tariffs. Berlin requires EU demand, factory output, labor, energy cost and disruptions. See `GET /api/market/tesla-events?asOf=2026-10-13` for a curated, dated source list and explicit planned feeds. These signals are **not yet connected to the forecast** and do not automatically imply share-price direction. Historical forecasting must prevent future-release or revised-data leakage.
