@@ -20,15 +20,34 @@ Open **http://127.0.0.1:5173** (React example) or **http://127.0.0.1:5173/exampl
 ## React DSL
 
 ```jsx
-<Substrate title="Release Review">
+<Substrate title="Substrate Elements — Release Review">
+
   <Agent role="researcher">
-    <Prompt>Collect release evidence.</Prompt>
-    <Agent role="critic"><Prompt>Challenge unsupported conclusions.</Prompt></Agent>
+    <Prompt>
+      Assess deployment readiness from available information.
+    </Prompt>
+
+    <Agent role="critic">
+      <Prompt>
+        Challenge assumptions and unsupported claims.
+      </Prompt>
+    </Agent>
   </Agent>
-  <Review>Human approval before report</Review>
-  <Agent role="reporter"><Prompt>Summarize the results and limitations.</Prompt></Agent>
+
+  <Review>
+    Approve the agent findings before the final report
+  </Review>
+
+  <Agent role="reporter">
+    <Prompt>
+      Summarize a cautious release recommendation.
+    </Prompt>
+  </Agent>
+
 </Substrate>
 ```
+
+**What each element does:** `Substrate` names the workflow; `Agent` creates an execution step; `Prompt` supplies instructions. The critic is nested beneath the researcher and runs before the review gate. `Review` pauses execution for approval or rejection; only approval allows the reporter to run. In demo mode, results are synthetic and the human review is an application-local gate, **not** a Substrate-authenticated approval.
 
 The JSX component definitions are in `src/main.jsx`; for a real reusable package, extract them into a dedicated library entry point before publishing to npm.
 

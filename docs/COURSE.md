@@ -6,6 +6,46 @@ Build a small answer-first agent website in which visitors can inspect **what ag
 ## 1. Run the local demo
 Run `npm install && npm run dev`, open http://127.0.0.1:5173 and run the sample Release Review. No account or API key is necessary in demo mode. Inspect the agent event log.
 
+## Canonical Release Review example
+
+The following JSX is the same Release Review workflow used in the running React demo. Copy it when learning the API:
+
+```jsx
+<Substrate title="Substrate Elements — Release Review">
+
+  <Agent role="researcher">
+    <Prompt>
+      Assess deployment readiness from available information.
+    </Prompt>
+
+    <Agent role="critic">
+      <Prompt>
+        Challenge assumptions and unsupported claims.
+      </Prompt>
+    </Agent>
+  </Agent>
+
+  <Review>
+    Approve the agent findings before the final report
+  </Review>
+
+  <Agent role="reporter">
+    <Prompt>
+      Summarize a cautious release recommendation.
+    </Prompt>
+  </Agent>
+
+</Substrate>
+```
+
+**Walkthrough:**
+
+1. `Substrate` names the workflow and renders the answer-first experience.
+2. The `researcher` agent assesses readiness. Its nested `critic` runs as a child step and challenges assumptions; this is a workflow relationship, not proof of an independently authenticated agent identity.
+3. `Review` pauses the workflow before the reporter. Rejecting prevents the reporter from executing; approving resumes it.
+4. The `reporter` produces the final answer, which the interface presents above its expandable activity trail.
+5. Demo-mode observations are synthetic. An application event log, MCP-recorded output, verified capsule integrity and independently authenticated review have **different** trust guarantees.
+
 ## 2. Define nested agents
 In `src/main.jsx`, nest an `<Agent role="critic">` under a researcher. Compare the order of agent execution in the expandable trace. The runtime limits plan depth and step count.
 
