@@ -12,6 +12,8 @@ export const RESEARCH_INPUTS=[
  {category:'policy',name:'Tariffs, tax credits and EV regulation',source:'Official regulations and dated announcements',status:'Planned'},
  {category:'geopolitics',name:'Wars, military escalation, sanctions and trade restrictions',source:'Official statements, dated sanctions registers, corroborated news; mark event and publication timestamps',status:'Planned: impact hypotheses must be tested, not presumed'},
  {category:'geopolitics',name:'Conflict-related shipping disruption, commodities and supply-chain exposure',source:'Shipping indices, energy prices and supplier disclosures',status:'Planned: distinguish indirect effects from observed Tesla exposure'},
- {category:'company',name:'Tesla filings, margins, cash flow, delivery revisions',source:'SEC / Tesla IR',status:'Planned: point-in-time extraction'}
+ {category:'company',name:'Tesla filings, margins, cash flow, delivery revisions',source:'SEC / Tesla IR',status:'Planned: point-in-time extraction'},
+ {category:'regional',name:'Tesla Shanghai: China demand, local EV competition, output, exports and China-US/EU tariffs',source:'Tesla disclosures, China auto industry statistics, government trade notices',status:'Planned: Shanghai factory and China market tracked separately'},
+ {category:'regional',name:'Tesla Berlin-Brandenburg: European production, labor, energy costs, EU demand and factory disruptions',source:'Tesla disclosures, German/EU official releases, reliable local reporting',status:'Planned: Berlin factory tracked separately'}
 ];
 export function visibleEvents(asOf){if(!/^\d{4}-\d{2}-\d{2}$/.test(asOf))throw Error('Date must be YYYY-MM-DD');return TESLA_EVENTS.filter(x=>x.availableAt<=asOf)}
