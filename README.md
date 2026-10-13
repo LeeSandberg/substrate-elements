@@ -112,3 +112,12 @@ The first commit was published through the connected GitHub integration. The ful
 ## License
 
 MIT. This public sample is separate from the private `thought-substrate` backend, which is **not** copied into this repository.
+
+
+## Two browser demos
+
+- `/` — overview and links to both demos.
+- `/demo/basics` — minimal JSX `<Substrate>`, nested `<Agent>`, `<Prompt>`, and `<Review>` example. Demo mode uses **synthetic** agent responses, clearly labeled.
+- `/demo/investigation` — fictional production-outage fixture with **real authenticated MCP** evidence recording, proposed evidence challenge, fresh workspace observation, and Evidence Capsule request. The UI deliberately does not claim a real replacement AI agent, Prolog proof, or accepted challenge exists.
+
+The investigation requires server-side `SUBSTRATE_MCP_URL`, `SUBSTRATE_MCP_BEARER`, `SUBSTRATE_WORKSPACE_ID`, and `REVIEW_API_KEY`. Keep it bound to localhost and reach it through SSH; do not publish the demo API unauthenticated. Enter the review key on the locally forwarded UI only. Prefer a **dedicated disposable workspace**: creating a capsule snapshots the configured workspace, which may contain records unrelated to this single demo. The server must be restarted after changing environment configuration.

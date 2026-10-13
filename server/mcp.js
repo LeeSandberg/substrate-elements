@@ -39,3 +39,6 @@ export const createCapsule=subject=>invoke('create_evidence_capsule',{subject,po
 export const verifyCapsule=capsule_id=>invoke('verify_evidence_capsule',{capsule_id});
 export const quarantineCapsule=capsule=>invoke('submit_capsule',{capsule});
 export const inspectWorkspace=()=>invoke('secure_observe',{});
+
+// A challenge is an untrusted proposal until separately reviewed by an authorized reviewer.
+export const proposeChallenge=(target_id,counter_evidence_id,rationale)=>invoke('propose_evidence_challenge',{target_id,counter_evidence_id,rationale});

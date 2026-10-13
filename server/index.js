@@ -1,9 +1,12 @@
 import http from 'node:http';
+import {randomUUID} from 'node:crypto';
 import {createRun,emit,safeDemoAnswer,validatePlan} from './engine.js';
 import {runModelAgent} from './provider.js';
-import {configured,checkSubstrate,recordToSubstrate,createCapsule,verifyCapsule,quarantineCapsule,inspectWorkspace} from './mcp.js';
+import {configured,checkSubstrate,recordToSubstrate,createCapsule,verifyCapsule,quarantineCapsule,inspectWorkspace,proposeChallenge} from './mcp.js';
 
 const runs=new Map(),listeners=new Map();
+const incidentSessions=new Map();
+const INCIDENT_FIXTURE=Object.freeze({id:'incident-1042',title:'Production API outage after deployment',evidence:[{id:'db',source:'fixture://incident-1042/db-monitoring',observation:'PostgreSQL health checks succeeded during the outage; application logs contain timeouts.'},{id:'auth',source:'fixture://incident-1042/auth-audit',observation:'An authorization policy changed immediately before requests began receiving HTTP 403 responses.'}],note:'Synthetic, labeled incident fixtures; NOT real production logs.'});
 const reviewKey=process.env.REVIEW_API_KEY;
 const safe=(e)=>String(e?.message||e).slice(0,400);
 function respond(res,status,object){res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(object))}
@@ -48,6 +51,43 @@ const server=http.createServer(async(req,res)=>{
     const url=new URL(req.url,'http://localhost');const p=url.pathname.split('/').filter(Boolean);
     if(req.method==='GET'&&url.pathname==='/api/health')return respond(res,200,{ok:true,mode:process.env.RUNNER_MODE||'demo',substrate:configured()});
     if(req.method==='GET'&&url.pathname==='/api/substrate/health')return respond(res,200,await checkSubstrate());
+    if(req.method==='GET'&&url.pathname==='/api/investigation/fixture')return respond(res,200,INCIDENT_FIXTURE);
+    if(req.method==='POST'&&url.pathname==='/api/investigation/start'){
+      if(!reviewKey||!authorized(req))return respond(res,403,{error:'Set REVIEW_API_KEY and authenticate to run the investigation'});
+      if(!configured())return respond(res,503,{error:'Substrate MCP is not configured; this demo cannot simulate evidence recording'});
+      const health=await checkSubstrate();
+      if(!health.connected)return respond(res,503,{error:'Substrate MCP disconnected: '+(health.error||'unknown')});
+      const id=randomUUID();
+      const first=await recordToSubstrate({incidentId:INCIDENT_FIXTURE.id,fixture:true,source:INCIDENT_FIXTURE.evidence[0].source,observation:INCIDENT_FIXTURE.evidence[0].observation,claim:'Database is root cause — unverified hypothesis'});
+      if(!first.recorded||!first.evidenceId)return respond(res,502,{error:'No confirmed Substrate evidence ID from first recording'});
+      const session={id,stage:'initial',evidence:[{fixtureId:'db',...first}],challenge:null,capsule:null,createdAt:new Date().toISOString()};
+      incidentSessions.set(id,session);return respond(res,201,session);
+    }
+    if(req.method==='POST'&&p[0]==='api'&&p[1]==='investigation'&&p[2]&&p[3]==='challenge'){
+      if(!reviewKey||!authorized(req))return respond(res,403,{error:'Reviewer credential required'});
+      const session=incidentSessions.get(p[2]);if(!session)return respond(res,404,{error:'Investigation not found'});
+      if(session.stage!=='initial')return respond(res,409,{error:'Challenge already submitted'});
+      const second=await recordToSubstrate({incidentId:INCIDENT_FIXTURE.id,fixture:true,source:INCIDENT_FIXTURE.evidence[1].source,observation:INCIDENT_FIXTURE.evidence[1].observation,claim:'Authentication policy change is an alternative hypothesis'});
+      if(!second.recorded||!second.evidenceId)return respond(res,502,{error:'No confirmed counter-evidence ID'});
+      session.evidence.push({fixtureId:'auth',...second});
+      const result=await proposeChallenge(session.evidence[0].evidenceId,second.evidenceId,'Database root-cause claim is contested by healthy DB probes and HTTP 403 authorization evidence. Synthetic teaching fixture.');
+      session.challenge={status:'submitted-not-approved',result};session.stage='challenged';
+      return respond(res,200,session);
+    }
+    if(req.method==='POST'&&p[0]==='api'&&p[1]==='investigation'&&p[2]&&p[3]==='capsule'){
+      if(!reviewKey||!authorized(req))return respond(res,403,{error:'Reviewer credential required'});
+      const session=incidentSessions.get(p[2]);if(!session)return respond(res,404,{error:'Investigation not found'});
+      const result=await createCapsule('Investigation '+INCIDENT_FIXTURE.id+' synthetic evidence');
+      session.capsule=result;return respond(res,200,{capsule:result,note:'Workspace capsule may include other workspace evidence; inspect scope and policy'});
+    }
+    if(req.method==='GET'&&p[0]==='api'&&p[1]==='investigation'&&p[2]&&p[3]==='handoff'){
+      if(!reviewKey||!authorized(req))return respond(res,403,{error:'Reviewer credential required'});
+      const session=incidentSessions.get(p[2]);if(!session)return respond(res,404,{error:'Investigation not found'});
+      // A new MCP call reads the shared workspace; no previous agent conversation is supplied.
+      const observed=await inspectWorkspace();
+      return respond(res,200,{sessionId:session.id,reconstructedFrom:'Fresh Substrate MCP observation, not the prior agent context',observed,agentReplaced:false,note:'This verifies shared-state retrieval; an independently launched replacement AI agent is not yet wired.'});
+    }
+
     if(req.method==='POST'&&url.pathname==='/api/runs'){
       const plan=validatePlan(await readBody(req));const run=createRun(plan);run.queue=flattened(plan.steps);run.cursor=0;runs.set(run.id,run);
       setImmediate(()=>execute(run));return respond(res,201,{id:run.id,status:run.status});
