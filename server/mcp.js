@@ -1,0 +1,9 @@
+import {Client} from '@modelcontextprotocol/sdk/client/index.js';
+import {StreamableHTTPClientTransport} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+export function configured(){return Boolean(process.env.SUBSTRATE_MCP_URL&&process.env.SUBSTRATE_MCP_BEARER&&process.env.SUBSTRATE_WORKSPACE_ID)}
+async function invoke(name,args){if(!configured())throw Error('MCP not configured');const url=new URL(process.env.SUBSTRATE_MCP_URL);if(url.protocol!=='https:'&&!['localhost','127.0.0.1'].includes(url.hostname))throw Error('HTTPS required');const client=new Client({name:'substrate-elements',version:'0.3.0'});const transport=new StreamableHTTPClientTransport(url,{requestInit:{headers:{Authorization:'Bearer '+process.env.SUBSTRATE_MCP_BEARER}}});try{await client.connect(transport);const r=await client.callTool({name,arguments:{workspace_id:process.env.SUBSTRATE_WORKSPACE_ID,...args}});if(r.isError)throw Error('MCP rejected '+name);if(r.structuredContent)return r.structuredContent.result??r.structuredContent;const raw=r.content?.find(x=>x.type==='text')?.text;try{return JSON.parse(raw)}catch{return {text:raw}}}finally{await client.close()}}
+export async function recordToSubstrate(payload){if(!configured())return {recorded:false,mode:'not-configured'};const r=await invoke('record_tool_result',{tool_name:'substrate-elements.agent-run',payload,observation:'Application-reported agent output. Not independently verified.'});return {recorded:!!r.tool_result?.id,toolResult:r.tool_result?.id??null,evidenceId:r.evidence?.id??null}}
+export const createCapsule=subject=>invoke('create_evidence_capsule',{subject,policy:'accepted_and_observed'});
+export const verifyCapsule=capsule_id=>invoke('verify_evidence_capsule',{capsule_id});
+export const quarantineCapsule=capsule=>invoke('submit_capsule',{capsule});
+export const inspectWorkspace=()=>invoke('secure_observe',{});
