@@ -1,0 +1,1 @@
+import {test} from 'node:test';import {strict as assert} from 'node:assert';import {providerConfigured,runModelAgent} from './provider.js';test('requires three provider values',()=>assert.equal(providerConfigured({MODEL_NAME:'x'}),false));test('rejects missing provider',async()=>{await assert.rejects(runModelAgent({role:'critic',prompt:'x'},[],{env:{}}))});
